@@ -47,6 +47,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <libpic30.h>
 #include <p33FJ128GP802.h>
 
@@ -73,7 +74,7 @@ uint16_t pwm_counter = 0;
 uint16_t dt_encoder = 0;
 uint16_t test;
 float rpm; 
-char received_char;
+char received_char[12];
 char send_char[20], s1[20]; 
 char ip_local[13] = "192.168.1.160", ip_remote[14] = "192.168.1.13";  
 uint16_t port = 900; 
@@ -90,6 +91,7 @@ void send_uart(char data);
 void delay_us(uint16_t us);
 void init_wifi(void);
 float ic_getrpm(void); 
+void read_text(char *output,uint8_t len); 
 
 int main(void)
 {
@@ -98,6 +100,8 @@ int main(void)
     init_timer(2, 3999);
     init_pwm();
     init_uart();
+    write_uart("START\r\n"); 
+    delay_us(500);
     init_wifi(); 
 
     while (1)
@@ -114,22 +118,17 @@ int main(void)
                 }
          * */
         TEST = 0;
-        delay_us(200);
-        OC1RS = 4000;
-        write_uart("hola\r\n");
+        delay_us(500);
+        OC1RS = 2000;
+        /*char a1[9]; 
+        sprintf(a1,"%chola%c \r\n",QUOTE,QUOTE);
+        write_uart(a1);*/
 
-        sprintf(send_char, "%u \r\n", 4593);
-        test = atoi(send_char);
-        delay_us(200);
-        write_uart(send_char);
-        delay_us(200);
-        sprintf(s1, "%u \r\n", test);
-        write_uart(s1);
 
-        if (U1STAbits.URXDA == 1)
-        {
-            received_char = U1RXREG;
-        }
+        read_text(received_char,2); 
+        write_uart("Lectura = ");
+        write_uart(received_char); 
+        
 
     }
 
@@ -318,7 +317,7 @@ init_uart(void)
     U1MODEbits.UARTEN = 1; // Enable UART
     U1STAbits.UTXEN = 1; // Enable UART TX
     DELAY_105uS //Delay para estabilizar BR
-    U1TXREG = 'J'; // Prueba de transmision
+    //U1TXREG = 'J'; // Prueba de transmision
 }
 
 char
@@ -327,7 +326,16 @@ read_uart(void)
     while (!U1STAbits.URXDA);
     return U1RXREG;
 }
-
+void 
+read_text(char *output, uint8_t len)
+{
+    uint8_t i_read = 0; 
+    for (i_read = 0; i_read < len; i_read++)
+    {
+        output[i_read] = read_uart();
+        //write_uart("j\n"); 
+    }
+}
 void
 send_uart(char data)
 {
@@ -370,23 +378,26 @@ init_wifi(void)
      * 3. SET IP
      *  AT+CIPSTA="192.168.1.160","192.168.1.1","255.255.255.0"
      * 4. CONNECT TO TCP SERVER
-     *  AT+CIPSTART="TCP","192.168.1.13",900
+     *  AT+CIPSTART="TCP","192.168.1.13",900\r\n
      * 5. WAIT FOR OK
      * 6. IF OK: 
      *      SEND: AT+CIPSEND=#CHARS
      *            MESSAGE (1S)
      *      RECEIVE: +IPD,4:HOLA   
+     * 
+     * List available APS
+     *      AT+CWLAP
      */
-    char send[55]; 
-    char resp; 
+    char send1[55]; 
     write_uart("AT+CWMODE=3\r\n" ); 
     delay_us(500); 
-    sprintf(send,"AT+CIPSTA=%c%s%c,%c192.168.1.1%c,%c255.255.255.0%c\r\n",QUOTE,ip_local,QUOTE,QUOTE,QUOTE,QUOTE,QUOTE); 
-    write_uart(send); 
+    sprintf(send1,"AT+CIPSTA=%c%s%c,%c192.168.1.1%c,%c255.255.255.0%c\r\n",QUOTE,ip_local,QUOTE,QUOTE,QUOTE,QUOTE,QUOTE); 
+    write_uart(send1); 
     delay_us(500);
    
-    sprintf(send,"AT+CIPSTART=%cTCP%c,%c%s%c,%d\r\n,",QUOTE,QUOTE,QUOTE,ip_remote,QUOTE,port); 
-    write_uart(send); 
+    char send2[40];
+    sprintf(send2,"AT+CIPSTART=%cTCP%c,%c%s%c,900\r\n",QUOTE,QUOTE,QUOTE,ip_remote,QUOTE,port); 
+    write_uart(send2); 
     
 }
 
@@ -446,7 +457,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _IC1Interrupt(void)
  */
 void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 {
-    received_char = U1RXREG;
+    //received_char = U1RXREG;
     /*
      * Clear error flags 
      */
