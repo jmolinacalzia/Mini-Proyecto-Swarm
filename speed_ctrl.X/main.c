@@ -52,6 +52,7 @@
 #include <p33FJ128GP802.h>
 
 
+
 #define DELAY_105uS asm volatile ("REPEAT, #4201"); Nop(); // 105uS delay
 #define DELAY_uS1  asm volatile ("REPEAT, #4000"); Nop(); 
 
@@ -59,6 +60,12 @@
 #define     BRGVAL      (((FP/BAUDRATE)/16)-1)
 #define     FP          40000000
 #define     BAUDRATE    115200
+
+#define     PULSES      39999
+#define     INT_TIME    0.001 
+
+#define     PULSES3     (65535*8)
+#define     TIME3       0.0128
 
 
 #define     STBY        LATAbits.LATA0
@@ -70,66 +77,104 @@
 #define     IP_LOCAL    192.168.1.160
 #define     QUOTE       34
 
+// Constantes para PID Digital utilizando forward Euler
+#define     TS          INT_TIME 
+
+#define     KP          (25)
+#define     KI          (10*TS) 
+#define     KD          (1/TS) 
+
+
+#define     RPM_MAX     60 
+#define     SUP         5 
+#define     INF         0 
+#define     M           (RPM_MAX/SUP)
+#define     K           (PULSES/RPM_MAX)
+
+
 uint16_t pwm_counter = 0;
 uint16_t dt_encoder = 0;
 uint16_t test;
-float rpm; 
-char received_char[12];
-char send_char[20], s1[20]; 
-char ip_local[13] = "192.168.1.160", ip_remote[14] = "192.168.1.13";  
-uint16_t port = 900; 
+double rpm, rpm_1;
+char received_char[50];
+char send_char[20], s1[20];
+char ip_local[14] = "192.168.1.160";
+char ip_remote[14] = "192.168.1.13";
+char * p_point1;
+char in_bytes[20], output[20];
+
+char b[5];
+uint16_t ba, bb, bc, bd;
+uint16_t port = 900;
+uint8_t i = 0;
+
+bool b_flag_uart = false;
+
+
+// variables para PID
+double ref, feedback;
+float e, E, ed, e_old, pid_out;
+
+
+uint16_t pid_int;
 
 void init_osc(void);
 void init_pins(void);
 void init_timer(uint8_t timer, uint16_t count_time);
 void init_pwm(void);
-void init_input_capture(void);
+void init_input_capture1(void);
 void init_uart(void);
 void write_uart(char *data);
 char read_uart(void);
 void send_uart(char data);
 void delay_us(uint16_t us);
 void init_wifi(void);
-float ic_getrpm(void); 
-void read_text(char *output,uint8_t len); 
+double ic_getrpm(void);
+void read_text(void);
 
 int main(void)
 {
     init_osc();
     init_pins();
-    init_timer(2, 3999);
+    init_timer(2, PULSES);
+    init_timer(3, 65535);
     init_pwm();
     init_uart();
-    write_uart("START\r\n"); 
+    //write_uart("START\r\n"); 
     delay_us(500);
-    init_wifi(); 
+    //init_wifi();
+    init_input_capture1();
+    write_uart("START\n");
+
+    /*p_my_array = &a[0];
+     *p_my_array = 23;
+    p_my_array++;
+     *p_my_array = 23;*/
 
     while (1)
     {
-        /*
-                pwm_counter++;
-                if(pwm_counter == 6000)
-                {
-                   OC1RS++; 
-                }
-                if(OC1RS == 4000)
-                {
-                    OC1RS = 0; 
-                }
-         * */
-        TEST = 0;
+        OC1RS = PULSES/2;
         delay_us(500);
-        OC1RS = 2000;
-        /*char a1[9]; 
-        sprintf(a1,"%chola%c \r\n",QUOTE,QUOTE);
-        write_uart(a1);*/
+        read_text();
+        write_uart(in_bytes);
+
+        //delay_us(1000); 
 
 
-        read_text(received_char,2); 
-        write_uart("Lectura = ");
-        write_uart(received_char); 
-        
+        //strncpy(compare, ref_wifi, 4);
 
+        /*if(strcmp("+IPD",compare)==0)
+        {
+            write_uart("AT+CIPSEND=5");
+            delay_us(500); 
+            write_uart("hallo");
+        }*/
+
+
+        /*if(received_char != '\0')
+        {
+            write_uart(received_char); 
+        }*/
     }
 
     return 0;
@@ -143,8 +188,8 @@ void
 init_pins(void)
 {
     TRISA = 0x0; //1 input
-    TRISBbits.TRISB0 = 0;
-    AD1PCFGL = 0b111111111;
+    TRISBbits.TRISB8 = 1;
+    AD1PCFGL = 0b111111111111;
     A_1 = 0;
     A_2 = 1;
     STBY = 1;
@@ -181,7 +226,7 @@ void init_pwm(void)
     //Output Compare Modulo
     OC1CONbits.OCM = 0b000; // Desactivar modulo OC
     OC1R = 0; // Ciclo de trabajo de primer pulso
-    OC1RS = 0; // Ciclo de trabajo de segundo pulso
+    OC1RS = PULSES / 2; // Ciclo de trabajo de segundo pulso
     OC1CONbits.OCTSEL = 0; // Seleccionar Timer 2
     OC1R = 0; // Se carga el valor del registro
     OC1CONbits.OCM = 0b110; // PWM + Activar
@@ -219,7 +264,7 @@ init_timer(uint8_t timer, uint16_t count_time)
 
          */
         IFS0bits.T1IF = 0;
-        IPC0bits.T1IP = 7; //0 deshabilitado, 7 maxima prioridad
+        IPC0bits.T1IP = 6; //0 deshabilitado, 7 maxima prioridad
         IEC0bits.T1IE = 1;
 
 
@@ -240,7 +285,7 @@ init_timer(uint8_t timer, uint16_t count_time)
            Segmento de codigo para configurar la duracion del timer
          */
         TMR2 = 0;
-        PR2 = count_time; //cada 0.1 ms
+        PR2 = count_time; //cada 1 ms
         //Interrupcion cada: (PRx+1)*(1/FOSC)s
 
         /*
@@ -254,6 +299,33 @@ init_timer(uint8_t timer, uint16_t count_time)
 
         //Se enciende el timerx
         T2CONbits.TON = 1;
+
+    case 3:
+        /*
+           Segmento de codigo para configurar el registro TxCON
+         */
+        T3CONbits.TON = 0; //apagamos timer
+        T3CONbits.TCS = 0; //Reloj interno (fosc/2)
+        T3CONbits.TSIDL = 0;
+        T3CONbits.TCKPS = 0b01; //1:8 prescaler
+        T3CONbits.TGATE = 0;
+        //T3CONbits.TSYNC = 0;    //No sincronizar
+
+        //Segmento de codigo para configurar la duracion del timer
+        TMR3 = 0;
+        PR3 = count_time;
+        //Interrupcion cada: ((500+1)*(1/FOSC))*prescaler s
+
+        /*
+           Segmento de codigo para configurar interrupciones
+           INTCON1 = INTCON2 = 0
+         */
+        IFS0bits.T3IF = 0; //Limpiamos bandera de interrupcion
+        IPC2bits.T3IP = 7; //nivel de prioridad
+        IEC0bits.T3IE = 1; //Habilitamos interrupcion  Timer1
+
+        //Se enciende el timerx
+        T1CONbits.TON = 1;
     }
 }
 
@@ -263,7 +335,7 @@ init_input_capture1(void)
     // Initialize the Input Capture Module
     IC1CONbits.ICM = 0b00; // Disable Input Capture 1 module    
     RPINR7bits.IC1R = 0b00101; //Input capture tied to RP5 -IC1
-    IC1CONbits.ICTMR = 1; // Select Timer2 as the IC1 Time base
+    IC1CONbits.ICTMR = 0; // Select Timer3 as the IC1 Time base
     IC1CONbits.ICI = 1; // Interrupt on every second capture event
     IC1CONbits.ICM = 0b011; // Generate capture event on every Rising edge
 
@@ -279,7 +351,7 @@ init_input_capture2(void)
     IC2CONbits.ICM = 0b00; // Disable Input Capture 1 module
     RPINR7bits.IC2R = 1; //Input capture tied to RP1 -IC1
     IC2CONbits.ICTMR = 1; // Select Timer2 as the IC1 Time base
-    IC2CONbits.ICI = 0; // Interrupt on every  capture event
+    IC2CONbits.ICI = 2; // Interrupt on every 2nd capture event
     IC2CONbits.ICM = 0b011; // Generate capture event on every Rising edge
 
     //Habilitamos interrupcion de captura y timer 2
@@ -291,6 +363,7 @@ init_input_capture2(void)
 void
 init_uart(void)
 {
+
     U1MODEbits.STSEL = 0; // 1-Stop bit
     U1MODEbits.PDSEL = 0; // Paridad nula
 
@@ -307,9 +380,9 @@ init_uart(void)
     IFS0bits.U1TXIF = 0;
     IPC3bits.U1TXIP = 4;
 
-    IEC0bits.U1RXIE = 0; // RX interrupt - desactivada
+    IEC0bits.U1RXIE = 1; // RX interrupt - desactivada
     IFS0bits.U1RXIF = 0;
-    IPC2bits.U1RXIP = 3;
+    IPC2bits.U1RXIP = 5;
 
     RPINR18bits.U1RXR = 8; //Pin para  RX = RB8
     RPOR4bits.RP9R = 0b00011; ////Pin para  TX = RB9
@@ -317,25 +390,47 @@ init_uart(void)
     U1MODEbits.UARTEN = 1; // Enable UART
     U1STAbits.UTXEN = 1; // Enable UART TX
     DELAY_105uS //Delay para estabilizar BR
-    //U1TXREG = 'J'; // Prueba de transmision
+            //U1TXREG = 'J'; // Prueba de transmision
 }
 
-char
-read_uart(void)
+/*
+void
+read_text(void)
 {
+    sprintf(received_char, "\0");
+    sprintf(a, "\0");
+    b = 0;
+    bool flag_read = true;
+    IFS0bits.U1RXIF = 0;
     while (!U1STAbits.URXDA);
-    return U1RXREG;
-}
-void 
-read_text(char *output, uint8_t len)
-{
-    uint8_t i_read = 0; 
-    for (i_read = 0; i_read < len; i_read++)
+    while (U1STAbits.RIDLE == 0 || U1STAbits.URXDA == 1)
     {
-        output[i_read] = read_uart();
-        //write_uart("j\n"); 
+
+        b = U1RXREG;
+        sprintf(a, "%c", b);
+        strcat(received_char, a);
+        if (b == 'z')
+        {
+            break;
+        }
+        if (U1STAbits.RIDLE == 0)
+        {
+            while (!IFS0bits.U1RXIF);
+        }
+        if (U1STAbits.URXDA == 1)
+        {
+            continue;
+        }
+        if (U1STAbits.OERR == 1)
+        {
+            U1STAbits.OERR = 0;
+            continue;
+        }
+        b = 0;
     }
+    b_flag_uart = true;
 }
+ */
 void
 send_uart(char data)
 {
@@ -383,42 +478,94 @@ init_wifi(void)
      * 6. IF OK: 
      *      SEND: AT+CIPSEND=#CHARS
      *            MESSAGE (1S)
-     *      RECEIVE: +IPD,4:HOLA   
+     *      RECEIVE: +IPD,1:H  10chars 
      * 
      * List available APS
      *      AT+CWLAP
      */
-    char send1[55]; 
-    write_uart("AT+CWMODE=3\r\n" ); 
-    delay_us(500); 
-    sprintf(send1,"AT+CIPSTA=%c%s%c,%c192.168.1.1%c,%c255.255.255.0%c\r\n",QUOTE,ip_local,QUOTE,QUOTE,QUOTE,QUOTE,QUOTE); 
-    write_uart(send1); 
-    delay_us(500);
-   
+    write_uart("AT\r\n");
+    delay_us(1000);
+    write_uart("AT+RST\r\n");
+    delay_us(2000);
+    char send1[55];
+    write_uart("AT+CWMODE=3\r\n");
+    delay_us(2000);
+    sprintf(send1, "AT+CIPSTA=%c%s%c,%c192.168.1.1%c,%c255.255.255.0%c\r\n", QUOTE, ip_local, QUOTE, QUOTE, QUOTE, QUOTE, QUOTE);
+    write_uart(send1);
+    delay_us(2000);
     char send2[40];
-    sprintf(send2,"AT+CIPSTART=%cTCP%c,%c%s%c,900\r\n",QUOTE,QUOTE,QUOTE,ip_remote,QUOTE,port); 
-    write_uart(send2); 
-    
+    sprintf(send2, "AT+CIPSTART=%cTCP%c,%c%s%c,800\r\n", QUOTE, QUOTE, QUOTE, ip_remote, QUOTE);
+    write_uart(send2);
+    delay_us(2000);
 }
 
-
-float
+double
 ic_getrpm(void)
 {
     uint16_t t1 = 0, t2 = 0, dt_encoder = 0;
-    float temp;
+    double T = 0, rpms, temp = 0, freq = 0, rpm_old;
+    rpm_old = rpms;
     t1 = IC1BUF; //Tiempo senal 1
     t2 = IC1BUF; //Tiempo senal 2
     //calculamos la diferencia de tiempo
     if (t2 > t1)
         dt_encoder = t2 - t1;
     else
-        dt_encoder = (PR2 - t1) + t2;
+        dt_encoder = (PR3 - t1) + t2;
 
-    //Calculamos RPM actual de la llanta
-    temp = 1000 / dt_encoder * 12;
-    return temp; 
+    temp = dt_encoder * (TIME3 / (2.5 * PULSES3))*1000;
+
+    T = (temp * 12.0);
+    freq = 1 / T; //Hz
+    rpms = 60.0 * freq;
+    if (rpms > 100)
+    {
+        rpms = rpm_old;
+    }
+    char ic[20];
+    sprintf(ic, "RPM: %u\n", t2);
+    write_uart(ic);
+    return rpms;
 }
+
+void
+read_text(void)
+{
+    write_uart("Leyendo\n");
+    uint8_t i, i_old;
+    unsigned char temp;
+    bool flag1 = true;
+    bool flag_in = false;
+    while (!U1STAbits.URXDA);
+    temp = U1RXREG;
+    in_bytes[0] = temp;
+    if (temp == '+')
+    {
+        in_bytes[0] = temp;
+
+        for (i = 1; i < 10; i++) //Loop over range i = 1 to 10 inclusively
+        {
+            while (!U1STAbits.URXDA); //Wait until at least one byte is available
+            in_bytes[i] = U1RXREG;
+
+        }
+    }
+    else
+    {
+        for (i = 0; i < 101; i++)
+        {
+            temp = U1RXREG;
+            U1STAbits.OERR = 0;
+            if (temp == 0)
+            {
+                break;
+            }
+            send_uart(temp);
+        }
+    }
+    write_uart(in_bytes);
+}
+
 /*
  Interrupts 
  */
@@ -435,10 +582,16 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
 
 void __attribute__((__interrupt__, no_auto_psv)) _T2Interrupt(void)
 {
-    /* Interrupt Service Routine code goes here */
-    TMR2 = 0;
     IFS0bits.T2IF = 0; // Clear Timer 2 interrupt flag
+    TMR2 = 0;
+    //OC1RS = PULSES; 
+}
 
+void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
+{
+    IFS0bits.T3IF = 0; // Clear Timer 3 interrupt flag
+    TMR3 = 0;
+    //OC1RS = PULSES; 
 }
 
 
@@ -447,9 +600,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _T2Interrupt(void)
 
 void __attribute__((__interrupt__, no_auto_psv)) _IC1Interrupt(void)
 {
-
-    IFS0bits.IC1IF = 1; //reiniciamos la captura del IC1
-    rpm = ic_getrpm(); 
+    rpm = ic_getrpm();
+    IFS0bits.IC1IF = 0; //reiniciamos la captura del IC1
 }
 
 /*
@@ -461,10 +613,6 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
     /*
      * Clear error flags 
      */
-    if (U1STAbits.OERR == 1)
-    {
-        U1STAbits.OERR = 0;
-    }
 
     IFS0bits.U1RXIF = 0;
 
@@ -473,8 +621,5 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1RXInterrupt(void)
 void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
 {
     IFS0bits.U1TXIF = 0; // Clear TX Interrupt flag
-    
+
 }
-
-
-
