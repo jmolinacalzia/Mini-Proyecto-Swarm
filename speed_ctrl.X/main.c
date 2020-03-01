@@ -41,6 +41,12 @@
 #pragma config ICS = PGD2               // Comm Channel Select (Communicate on PGC2/EMUC2 and PGD2/EMUD2)
 #pragma config JTAGEN = OFF              // JTAG Port Enable (JTAG is Enabled)
 
+// FWDT
+#pragma config WDTPOST = PS32768        // Watchdog Timer Postscaler (1:32,768)
+#pragma config WDTPRE = PR128           // WDT Prescaler (1:128)
+#pragma config WINDIS = OFF             // Watchdog Timer Window (Watchdog Timer in Non-Window mode)
+#pragma config FWDTEN = OFF             // Watchdog Timer Enable (Watchdog timer enabled/disabled by user software)
+
 
 #include <xc.h>
 #include <math.h>
@@ -61,11 +67,11 @@
 #define     FP          40000000
 #define     BAUDRATE    115200
 
-#define     PULSES      3999
-#define     INT_TIME    0.0001 
+#define     PULSES      39999
+#define     INT_TIME    0.001 
 
 #define     PULSES1     39999
-#define     TS          0.001
+#define     TS          0.05
 
 
 
@@ -82,12 +88,12 @@
 // Constantes para PID Digital utilizando forward Euler
 
 
-#define     KP          (10)
-#define     KI          (0.05*TS) 
-#define     KD          (0.01/TS) 
+#define     KP          (5)
+#define     KI          (5*TS) 
+#define     KD          (0.1/TS) 
 
 
-#define     RPM_MAX     270
+#define     RPM_MAX     280
 #define     RPM_MIN     0
 #define     PULSES_MIN  399
 
@@ -103,23 +109,24 @@ char ip_local[14] = "192.168.1.160";
 char ip_remote[14] = "192.168.1.13";
 char * p_point1;
 char in_bytes[20], output[20];
-
+uint16_t control_counter;
+uint16_t load_error0;
 char b[5];
 uint16_t ba, bb, bc, bd;
 uint16_t port = 900;
 uint16_t t1 = 0, t2 = 0, dt = 0;
 uint32_t ms = 0;
-uint8_t i = 0;
-bool b_ext = true;
-
+uint8_t i = 0, ctrl = 0;
+bool b_ext = true; 
 bool b_flag_uart = false;
 
 
 // variables para PID
-double ref, feedback;
-float e, E, ed, e_old, pid_out;
+double ref, feedback, freq, T, feedback1, temp;
+float e, E, ed, e_old, pid_out, pid_out1;
 uint16_t pid_int;
-
+uint16_t load;
+uint16_t diff;
 void init_osc(void);
 void init_pins(void);
 void init_timer(uint8_t timer, uint16_t count_time);
@@ -151,8 +158,8 @@ int main(void)
     init_timer(1, PULSES1);
     while (1)
     {
-        // minimo = 10% 
-        OC1RS = 39999;
+ 
+     
         //read_text();
         //write_uart(in_bytes);
 
@@ -223,10 +230,10 @@ void init_pwm(void)
 {
     //Output Compare Modulo
     OC1CONbits.OCM = 0b000; // Desactivar modulo OC
-    OC1R = PULSES / 2; // Ciclo de trabajo de primer pulso
-    OC1RS = PULSES / 2; // Ciclo de trabajo de segundo pulso
+    OC1R = 0; // Ciclo de trabajo de primer pulso
+    OC1RS = 0; // Ciclo de trabajo de segundo pulso
     OC1CONbits.OCTSEL = 0; // Seleccionar Timer 2
-    OC1R = PULSES / 2; // Se carga el valor del registro
+    OC1R = 0; // Se carga el valor del registro
     OC1CONbits.OCM = 0b110; // PWM + Activar
 
     RPOR3bits.RP6R = 0b10010; //RB6 conectado a salida PWM
@@ -504,17 +511,17 @@ ext_getrpm(uint16_t dt)
 {
     double T, rpms, freq, DT;
     T = (dt * 12.0) * INT_TIME; //S
-    if(T == 0)
-        T = 1; 
+    if (T == 0)
+        T = 1;
     DT = dt * INT_TIME * 1000;
     freq = 1 / T; //Hz
     rpms = 60.0 * freq; //RPM
     char ic[20];
     //sprintf(ic, "RPM: %f\n", rpms);
     // write_uart(ic);
-    write_uart("Funciona\n"); 
+    write_uart("Funciona\n");
     return rpms;
-    
+
 }
 
 void
@@ -574,22 +581,88 @@ init_extint(void)
 
 void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
 {
-    /*
-    /* Interrupt Service Routine code goes here */
-    IFS0bits.T1IF = 0; // Clear Timer 2 interrupt flag
-    //write_uart("Control\n"); 
-    //ref = 150; //rpm 
-    //Control PID
-    //e = ref - feedback;
-    //E = E + e;
-    //ed = e - e_old;
+    IFS0bits.T1IF = 0; // Clear Timer 1 interrupt flag
+    TMR1 = 0; //Reiniciamos cuenta TMR1
+    control_counter++;
 
-    //pid_out = KP*e + KI*E + KD*ed; //rpm
-    //e_old = e;
+    if (control_counter == 50)
+    {
+        ref = 200; //rpm 
+        ref = (ref) / RPM_MAX; //Ref entre 0-1
+        if (ref > 1)
+        {
+            ref = 1;
+        }
+        if (ref < 0)
+        {
+            ref = 0;
+        }
 
-    //pid_int = (uint16_t) (((PULSES - PULSES_MIN) / (RPM_MAX)) * pid_out + PULSES_MIN);
-    //sprintf(output, "%f\n", feedback);
-    //write_uart(output);
+        //Control PID
+        e = ref - feedback; //Error
+        if (fabs(e) > 0.05)
+        {
+            E = E + e; //Suma de error
+            ed = e - e_old; //Cambio en el error
+            pid_out = KP * e + KI * E + KD * ed; //rpm //double
+            e_old = e;
+            if (pid_out < 0)
+                pid_out1 = pid_out*-1;
+            if (pid_out > 0)
+            {
+                pid_out1 = pid_out * PULSES;
+                if (pid_out > 1)
+                {
+                    pid_out1 = PULSES;
+                }
+
+            }
+            pid_int = (uint16_t) pid_out1;
+
+            if (pid_out < 0)
+            {
+                if (load > pid_int)
+                {
+                    load = load - (pid_int);
+                    write_uart("Caso1\n");
+                }
+                else
+                {
+                    diff = pid_int - load;
+                    load = load - diff;
+                    write_uart("Caso2\n");
+                }
+                if (load > PULSES)
+                {
+                    load = load - PULSES;
+                    write_uart("Caso3\n");
+                }
+
+                OC1RS = load;
+
+            }
+            else
+            {
+                load = pid_int;
+                OC1RS = load; //Cargamos control al PWM
+                write_uart("Caso4\n");
+            }
+
+        }
+
+        sprintf(output, "Ref = %.2f\n", ref);
+        write_uart(output);
+        sprintf(output, "Feedback = %.2f\n", feedback);
+        write_uart(output);
+        sprintf(output, "PID = %.2f\n", pid_out);
+        write_uart(output);
+        sprintf(output, "Error = %.2f\n", fabs(e));
+        write_uart(output);
+        control_counter = 0;
+        sprintf(output, "PWM = %u\n", load);
+        write_uart(output);
+    }
+
 }
 
 void __attribute__((__interrupt__, no_auto_psv)) _T2Interrupt(void)
@@ -601,9 +674,9 @@ void __attribute__((__interrupt__, no_auto_psv)) _T2Interrupt(void)
 
 void __attribute__((__interrupt__, no_auto_psv)) _T3Interrupt(void)
 {
-   
+
     IFS0bits.T3IF = 0; // Clear Timer 3 interrupt flag
-    
+
 }
 
 
@@ -638,18 +711,32 @@ void __attribute__((__interrupt__, no_auto_psv)) _U1TXInterrupt(void)
 
 void __attribute__((__interrupt__, no_auto_psv)) _INT1Interrupt(void)
 {
-    if (b_ext)
+
+    IEC0bits.T1IE = 0; //Timer 1 - not enabled
+    IFS0bits.T1IF = 0; //Timer 1 Flag active
+    IEC0bits.T2IE = 0; //Timer 2 - not enabled
+    IFS0bits.T2IF = 0; //Timer 2 Flag active
+
+    if (b_ext) //Encendemos "Cronometro"
     {
         ms = 0;
     }
-    else
+    else //Detenemos cronometro
     {
 
         dt = ms;
+        T = (dt * 12.0) * INT_TIME; //S
+        //DT = dt * INT_TIME;
+        freq = 1 / T; //Hz
+        feedback1 = 60.0 * freq; //Obtenemos la velocidad actual del motor
+        feedback = (feedback1) / RPM_MAX; //valor entre 0-1
+        write_uart("INT EXTERNA\n");
     }
     b_ext = !b_ext;
-    feedback = ext_getrpm(dt); 
-    write_uart("Entra\n"); 
+
+    IEC0bits.T1IE = 1; //Timer 1 - enabled
+    IEC0bits.T2IE = 1; //Timer 2 - enabled
+    IFS0bits.T1IF = 0; //Timer 1 Flag active
     IFS1bits.INT1IF = 0; // Clear EXT-INT1 Interrupt flag
-    
+
 }
