@@ -108,7 +108,11 @@ char send_char[20], s1[20];
 char ip_local[14] = "192.168.1.160";
 char ip_remote[14] = "192.168.1.13";
 char * p_point1;
-char in_bytes[20], output[20];
+char in_bytes[20], output[20],output1[20];
+const char tok[2] = ":";
+char *token;
+char ref_wifi;
+uint8_t ref_wifi_int; 
 uint16_t control_counter;
 uint16_t load_error0;
 char b[5];
@@ -117,8 +121,9 @@ uint16_t port = 900;
 uint16_t t1 = 0, t2 = 0, dt = 0;
 uint32_t ms = 0;
 uint8_t i = 0, ctrl = 0;
-bool b_ext = true; 
+bool b_ext = true;
 bool b_flag_uart = false;
+
 
 
 // variables para PID
@@ -158,8 +163,10 @@ int main(void)
     init_timer(1, PULSES1);
     while (1)
     {
- 
-     
+        read_text();
+        write_uart(in_bytes);
+        
+        
         //read_text();
         //write_uart(in_bytes);
 
@@ -527,7 +534,7 @@ ext_getrpm(uint16_t dt)
 void
 read_text(void)
 {
-    write_uart("Leyendo\n");
+    //write_uart("Leyendo\n");
     uint8_t i, i_old;
     unsigned char temp;
     bool flag1 = true;
@@ -546,6 +553,12 @@ read_text(void)
             in_bytes[i] = U1RXREG;
 
         }
+        token = strtok(in_bytes, tok);
+        token = strtok(NULL, tok);
+        ref_wifi = token[0]; 
+        ref_wifi_int = (uint8_t)(ref_wifi);
+        sprintf(output1,"Lectura = %u\n",ref_wifi_int); 
+        write_uart(output1); 
     }
     else
     {
@@ -587,7 +600,8 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
 
     if (control_counter == 50)
     {
-        ref = 200; //rpm 
+        //ref = 200; //rpm 
+        ref = (double)(ref_wifi_int*1.0);
         ref = (ref) / RPM_MAX; //Ref entre 0-1
         if (ref > 1)
         {
@@ -624,18 +638,18 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
                 if (load > pid_int)
                 {
                     load = load - (pid_int);
-                    write_uart("Caso1\n");
+                    // write_uart("Caso1\n");
                 }
                 else
                 {
                     diff = pid_int - load;
                     load = load - diff;
-                    write_uart("Caso2\n");
+                    //write_uart("Caso2\n");
                 }
                 if (load > PULSES)
                 {
                     load = load - PULSES;
-                    write_uart("Caso3\n");
+                    //write_uart("Caso3\n");
                 }
 
                 OC1RS = load;
@@ -645,22 +659,22 @@ void __attribute__((__interrupt__, no_auto_psv)) _T1Interrupt(void)
             {
                 load = pid_int;
                 OC1RS = load; //Cargamos control al PWM
-                write_uart("Caso4\n");
+                //write_uart("Caso4\n");
             }
 
         }
 
         sprintf(output, "Ref = %.2f\n", ref);
-        write_uart(output);
+        //write_uart(output);
         sprintf(output, "Feedback = %.2f\n", feedback);
-        write_uart(output);
+        //write_uart(output);
         sprintf(output, "PID = %.2f\n", pid_out);
-        write_uart(output);
+        //write_uart(output);
         sprintf(output, "Error = %.2f\n", fabs(e));
-        write_uart(output);
+        //write_uart(output);
         control_counter = 0;
         sprintf(output, "PWM = %u\n", load);
-        write_uart(output);
+        //write_uart(output);
     }
 
 }
@@ -730,7 +744,7 @@ void __attribute__((__interrupt__, no_auto_psv)) _INT1Interrupt(void)
         freq = 1 / T; //Hz
         feedback1 = 60.0 * freq; //Obtenemos la velocidad actual del motor
         feedback = (feedback1) / RPM_MAX; //valor entre 0-1
-        write_uart("INT EXTERNA\n");
+        //write_uart("INT EXTERNA\n");
     }
     b_ext = !b_ext;
 
