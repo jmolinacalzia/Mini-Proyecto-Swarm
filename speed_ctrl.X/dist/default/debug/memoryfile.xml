@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-  <executable name="dist/default/production/speed_ctrl.X.production.elf">
+  <executable name="dist/default/debug/speed_ctrl.X.debug.elf">
     <memory name="data">
       <units>bytes</units>
       <length>16384</length>
-      <used>442</used>
-      <free>15942</free>
+      <used>522</used>
+      <free>15862</free>
     </memory>
     <memory name="program">
       <units>bytes</units>
       <length>131328</length>
-      <used>13329</used>
-      <free>117999</free>
+      <used>13338</used>
+      <free>117990</free>
     </memory>
   </executable>
 </project>

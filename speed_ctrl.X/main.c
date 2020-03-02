@@ -116,6 +116,7 @@ uint8_t ref_wifi_int;
 uint16_t control_counter;
 uint16_t load_error0;
 char b[5];
+char feedback_send[20]; 
 uint16_t ba, bb, bc, bd;
 uint16_t port = 900;
 uint16_t t1 = 0, t2 = 0, dt = 0;
@@ -157,36 +158,13 @@ int main(void)
     init_pwm();
     init_uart();
     delay_us(500);
-    //init_wifi();
-    write_uart("START\n");
+    init_wifi();
+    //write_uart("START\n");
     init_extint();
     init_timer(1, PULSES1);
     while (1)
     {
         read_text();
-        write_uart(in_bytes);
-        
-        
-        //read_text();
-        //write_uart(in_bytes);
-
-        //delay_us(1000); 
-
-
-        //strncpy(compare, ref_wifi, 4);
-
-        /*if(strcmp("+IPD",compare)==0)
-        {
-            write_uart("AT+CIPSEND=5");
-            delay_us(500); 
-            write_uart("hallo");
-        }*/
-
-
-        /*if(received_char != '\0')
-        {
-            write_uart(received_char); 
-        }*/
     }
 
     return 0;
@@ -407,44 +385,6 @@ init_uart(void)
             //U1TXREG = 'J'; // Prueba de transmision
 }
 
-/*
-void
-read_text(void)
-{
-    sprintf(received_char, "\0");
-    sprintf(a, "\0");
-    b = 0;
-    bool flag_read = true;
-    IFS0bits.U1RXIF = 0;
-    while (!U1STAbits.URXDA);
-    while (U1STAbits.RIDLE == 0 || U1STAbits.URXDA == 1)
-    {
-
-        b = U1RXREG;
-        sprintf(a, "%c", b);
-        strcat(received_char, a);
-        if (b == 'z')
-        {
-            break;
-        }
-        if (U1STAbits.RIDLE == 0)
-        {
-            while (!IFS0bits.U1RXIF);
-        }
-        if (U1STAbits.URXDA == 1)
-        {
-            continue;
-        }
-        if (U1STAbits.OERR == 1)
-        {
-            U1STAbits.OERR = 0;
-            continue;
-        }
-        b = 0;
-    }
-    b_flag_uart = true;
-}
- */
 void
 send_uart(char data)
 {
@@ -487,7 +427,7 @@ init_wifi(void)
      * 3. SET IP
      *  AT+CIPSTA="192.168.1.160","192.168.1.1","255.255.255.0"
      * 4. CONNECT TO TCP SERVER
-     *  AT+CIPSTART="TCP","192.168.1.13",900\r\n
+     *  AT+CIPSTART="TCP","192.168.1.13",900
      * 5. WAIT FOR OK
      * 6. IF OK: 
      *      SEND: AT+CIPSEND=#CHARS
@@ -498,19 +438,22 @@ init_wifi(void)
      *      AT+CWLAP
      */
     write_uart("AT\r\n");
-    delay_us(1000);
+    delay_us(4000);
     write_uart("AT+RST\r\n");
-    delay_us(2000);
+    delay_us(4000);
     char send1[55];
     write_uart("AT+CWMODE=3\r\n");
-    delay_us(2000);
+    delay_us(4000);
     sprintf(send1, "AT+CIPSTA=%c%s%c,%c192.168.1.1%c,%c255.255.255.0%c\r\n", QUOTE, ip_local, QUOTE, QUOTE, QUOTE, QUOTE, QUOTE);
     write_uart(send1);
-    delay_us(2000);
+    delay_us(4000);
     char send2[40];
-    sprintf(send2, "AT+CIPSTART=%cTCP%c,%c%s%c,800\r\n", QUOTE, QUOTE, QUOTE, ip_remote, QUOTE);
+    sprintf(send2, "AT+CIPSTART=%cTCP%c,%c%s%c,900\r\n", QUOTE, QUOTE, QUOTE, ip_remote, QUOTE);
     write_uart(send2);
-    delay_us(2000);
+    delay_us(4000);
+    write_uart("AT+CIPSEND=1\r\n"); 
+    delay_us(4000); 
+    write_uart("a");
 }
 
 double
@@ -526,7 +469,7 @@ ext_getrpm(uint16_t dt)
     char ic[20];
     //sprintf(ic, "RPM: %f\n", rpms);
     // write_uart(ic);
-    write_uart("Funciona\n");
+   // write_uart("Funciona\n");
     return rpms;
 
 }
@@ -558,7 +501,13 @@ read_text(void)
         ref_wifi = token[0]; 
         ref_wifi_int = (uint8_t)(ref_wifi);
         sprintf(output1,"Lectura = %u\n",ref_wifi_int); 
-        write_uart(output1); 
+        //write_uart(output1); 
+        if(ref_wifi_int == 65)
+        {
+            TEST = 1; 
+        }
+        else
+            TEST = 0; 
     }
     else
     {

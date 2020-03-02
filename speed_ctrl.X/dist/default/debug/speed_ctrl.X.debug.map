@@ -4,10 +4,15 @@ Tool Name:
   c:\program files\microchip\bin\bin\..\bin/elf-ld.exe
 
 Command:
+  -TC:\\Users\\jmoli\\AppData\\Local\\Temp\\tmp00002430.00 \
+  -TC:\\Users\\jmoli\\AppData\\Local\\Temp\\tmp00002430.01 \
+  -TC:\\Users\\jmoli\\AppData\\Local\\Temp\\tmp00002430.02 \
+  -TC:\\Users\\jmoli\\AppData\\Local\\Temp\\tmp00002430.03 \
+  -TC:\\Users\\jmoli\\AppData\\Local\\Temp\\tmp00002430.04 \
   -p33FJ128GP802 \
   --mdfp=C:/Microchip/packs/Microchip/dsPIC33F-GP-MC_DFP/1.1.15/xc16 \
   -o \
-  dist/default/production/speed_ctrl.X.production.elf \
+  dist/default/debug/speed_ctrl.X.debug.elf \
   -Lc:/program files/microchip/bin/bin/.. \
   -LC:/Microchip/packs/Microchip/dsPIC33F-GP-MC_DFP/1.1.15/xc16/bin/../support/PIC24H/gld \
   -LC:/Microchip/packs/Microchip/dsPIC33F-GP-MC_DFP/1.1.15/xc16/bin/../support/dsPIC33F/gld \
@@ -25,9 +30,12 @@ Command:
   -Lc:/program files/microchip/bin/bin/../../support/dsPIC33E/gld \
   -Lc:/program files/microchip/bin/bin/../../lib/dsPIC33F \
   -Lc:/program files/microchip/bin/bin/../../support/dsPIC33F/gld \
-  build/default/production/main.o \
+  build/default/debug/main.o \
   --defsym=__MPLAB_BUILD=1 \
-  -Tp33FJ128GP802.gld.00 \
+  --defsym=__MPLAB_DEBUG=1 \
+  --defsym=__DEBUG=1 \
+  --defsym=__MPLAB_DEBUGGER_PK3=1 \
+  -Tp33FJ128GP802.gld.05 \
   --stack=16 \
   --check-sections \
   --data-init \
@@ -39,10 +47,10 @@ Command:
   --stackguard=16 \
   --no-force-link \
   --smart-io \
-  -Map=dist/default/production/speed_ctrl.X.production.map \
+  -Map=dist/default/debug/speed_ctrl.X.debug.map \
   --report-mem \
   --memorysummary \
-  dist/default/production/memoryfile.xml \
+  dist/default/debug/memoryfile.xml \
   -start-group \
   --library=lega-pic30-elf \
   --library=m-elf \
@@ -58,19 +66,19 @@ c:/program files/microchip/bin/bin/../../lib\liblega-pic30-elf.a(data_init_stand
 c:/program files/microchip/bin/bin/../../lib\liblega-pic30-elf.a(crt_start_mode_normal.Leo)
                               (__crt_start_mode_normal)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(addsf3.eo)
-                              build/default/production/main.o (___subsf3)
+                              build/default/debug/main.o (___subsf3)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(divsf3.eo)
-                              build/default/production/main.o (___divsf3)
+                              build/default/debug/main.o (___divsf3)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(feqltle.eo)
-                              build/default/production/main.o (___eqsf2)
+                              build/default/debug/main.o (___eqsf2)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(fgtge.eo)
-                              build/default/production/main.o (___gtsf2)
+                              build/default/debug/main.o (___gtsf2)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(fixunssfsi.eo)
-                              build/default/production/main.o (___fixunssfsi)
+                              build/default/debug/main.o (___fixunssfsi)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatsisf.eo)
-                              build/default/production/main.o (___floatsisf)
+                              build/default/debug/main.o (___floatsisf)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatunsisf.eo)
-                              build/default/production/main.o (___floatunsisf)
+                              build/default/debug/main.o (___floatunsisf)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(fpack.eo)
                               c:/program files/microchip/bin/bin/../../lib\libm-elf.a(addsf3.eo) (__fpack)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(funpack.eo)
@@ -80,7 +88,7 @@ c:/program files/microchip/bin/bin/../../lib\libm-elf.a(funpack2.eo)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(futil.eo)
                               c:/program files/microchip/bin/bin/../../lib\libm-elf.a(addsf3.eo) (__fPropagateNaN)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(mulsf3.eo)
-                              build/default/production/main.o (___mulsf3)
+                              build/default/debug/main.o (___mulsf3)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(fcompare.eo)
                               c:/program files/microchip/bin/bin/../../lib\libm-elf.a(feqltle.eo) (__fcompare)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatdisf.eo)
@@ -88,11 +96,11 @@ c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatdisf.eo)
 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatundisf.eo)
                               c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatunsisf.eo) (___floatundisf)
 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(sprintf_cdfFnopsuxX.XXeo)
-                              build/default/production/main.o (__sprintf_cdfFnopsuxX)
+                              build/default/debug/main.o (__sprintf_cdfFnopsuxX)
 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(sprintf_cdnopsuxX.XXeo)
-                              build/default/production/main.o (__sprintf_cdnopsuxX)
+                              build/default/debug/main.o (__sprintf_cdnopsuxX)
 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(strtok.XX_eo)
-                              build/default/production/main.o (_strtok)
+                              build/default/debug/main.o (_strtok)
 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(memcpy.XX_eo)
                               c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(sprintf_cdfFnopsuxX.XXeo) (_memcpy)
 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(strcspn.XX_eo)
@@ -209,23 +217,28 @@ Default Scalar Model: Small
 section                    address   length (PC units)   length (bytes) (dec)
 -------                    -------   -----------------   --------------------
 .text                        0x200              0x1cfe          0x2b7d  (11133)
-.const                      0x1efe                0xd4           0x13e  (318)
-.text                       0x1fd2               0x428           0x63c  (1596)
-.dinit                      0x23fa                0xbc           0x11a  (282)
+.const                      0x1efe                0xde           0x14d  (333)
+.text                       0x1fdc               0x424           0x636  (1590)
+.dinit                      0x2400                0xbc           0x11a  (282)
 
-                 Total "program" memory used (bytes):         0x3411  (13329) 10%
+                 Total "program" memory used (bytes):         0x341a  (13338) 10%
 
 
 "data" Memory  [Origin = 0x800, Length = 0x4000]
 
 section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
-.nbss                        0x800                   0            0x64  (100)
-.ndata                       0x864                   0             0x4  (4)
-.bss                         0x868                   0            0x9c  (156)
-.data                        0x904                   0            0xb6  (182)
+reserve_data_0x800           0x800                0x20            0x20  (32)
+reserve_data_0x820           0x820                 0x2             0x2  (2)
+reserve_data_0x822           0x822                 0x2             0x2  (2)
+reserve_data_0x824           0x824                 0x2             0x2  (2)
+reserve_data_0x826           0x826                0x2a            0x2a  (42)
+.nbss                        0x850                   0            0x64  (100)
+.ndata                       0x8b4                   0             0x4  (4)
+.bss                         0x8b8                   0            0x9c  (156)
+.data                        0x954                   0            0xb6  (182)
 
-                 Total "data" memory used (bytes):          0x1ba  (442) 2%
+                 Total "data" memory used (bytes):          0x20a  (522) 3%
 
 
 Dynamic Memory Usage
@@ -233,114 +246,114 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                        0x9ba                              0x3e46  (15942)
+stack                        0xa0a                              0x3df6  (15862)
 
-                 Maximum dynamic memory (bytes):         0x3e46  (15942)
+                 Maximum dynamic memory (bytes):         0x3df6  (15862)
 
 Info: Project is using a large data memory model when small data memory model is sufficient.
 
 
 External Symbols in Data Memory (by address):
 
-                    0x0800                  _pwm_counter
-                    0x0802                  _dt_encoder
-                    0x0804                  _test
-                    0x0806                  _rpm
-                    0x080a                  _rpm_1
-                    0x080e                  _p_point1
-                    0x0810                  _token
-                    0x0812                  _ref_wifi
-                    0x0813                  _ref_wifi_int
-                    0x0814                  _control_counter
-                    0x0816                  _load_error0
-                    0x0818                  _ba
-                    0x081a                  _bb
-                    0x081c                  _bc
-                    0x081e                  _bd
-                    0x0820                  _t1
-                    0x0822                  _t2
-                    0x0824                  _dt
-                    0x0826                  _ms
-                    0x082a                  _i
-                    0x082b                  _ctrl
-                    0x082c                  _b_flag_uart
-                    0x082e                  _ref
-                    0x0832                  _feedback
-                    0x0836                  _freq
-                    0x083a                  _T
-                    0x083e                  _feedback1
-                    0x0842                  _temp
-                    0x0846                  _e
-                    0x084a                  _E
-                    0x084e                  _ed
-                    0x0852                  _e_old
-                    0x0856                  _pid_out
-                    0x085a                  _pid_out1
-                    0x085e                  _pid_int
-                    0x0860                  _load
-                    0x0862                  _diff
-                    0x0864                  _port
-                    0x0866                  _b_ext
-                    0x0868                  _received_char
-                    0x089a                  _send_char
-                    0x08ae                  _s1
-                    0x08c2                  _in_bytes
-                    0x08d6                  _output
-                    0x08ea                  _output1
-                    0x08fe                  _b
-                    0x097e                  _ip_local
-                    0x098c                  _ip_remote
+                    0x0850                  _pwm_counter
+                    0x0852                  _dt_encoder
+                    0x0854                  _test
+                    0x0856                  _rpm
+                    0x085a                  _rpm_1
+                    0x085e                  _p_point1
+                    0x0860                  _token
+                    0x0862                  _ref_wifi
+                    0x0863                  _ref_wifi_int
+                    0x0864                  _control_counter
+                    0x0866                  _load_error0
+                    0x0868                  _ba
+                    0x086a                  _bb
+                    0x086c                  _bc
+                    0x086e                  _bd
+                    0x0870                  _t1
+                    0x0872                  _t2
+                    0x0874                  _dt
+                    0x0876                  _ms
+                    0x087a                  _i
+                    0x087b                  _ctrl
+                    0x087c                  _b_flag_uart
+                    0x087e                  _ref
+                    0x0882                  _feedback
+                    0x0886                  _freq
+                    0x088a                  _T
+                    0x088e                  _feedback1
+                    0x0892                  _temp
+                    0x0896                  _e
+                    0x089a                  _E
+                    0x089e                  _ed
+                    0x08a2                  _e_old
+                    0x08a6                  _pid_out
+                    0x08aa                  _pid_out1
+                    0x08ae                  _pid_int
+                    0x08b0                  _load
+                    0x08b2                  _diff
+                    0x08b4                  _port
+                    0x08b6                  _b_ext
+                    0x08b8                  _received_char
+                    0x08ea                  _send_char
+                    0x08fe                  _s1
+                    0x0912                  _in_bytes
+                    0x0926                  _output
+                    0x093a                  _output1
+                    0x094e                  _b
+                    0x09ce                  _ip_local
+                    0x09dc                  _ip_remote
 
 External Symbols in Data Memory (by name):
 
-                    0x084a                  _E
-                    0x083a                  _T
-                    0x08fe                  _b
-                    0x0866                  _b_ext
-                    0x082c                  _b_flag_uart
-                    0x0818                  _ba
-                    0x081a                  _bb
-                    0x081c                  _bc
-                    0x081e                  _bd
-                    0x0814                  _control_counter
-                    0x082b                  _ctrl
-                    0x0862                  _diff
-                    0x0824                  _dt
-                    0x0802                  _dt_encoder
-                    0x0846                  _e
-                    0x0852                  _e_old
-                    0x084e                  _ed
-                    0x0832                  _feedback
-                    0x083e                  _feedback1
-                    0x0836                  _freq
-                    0x082a                  _i
-                    0x08c2                  _in_bytes
-                    0x097e                  _ip_local
-                    0x098c                  _ip_remote
-                    0x0860                  _load
-                    0x0816                  _load_error0
-                    0x0826                  _ms
-                    0x08d6                  _output
-                    0x08ea                  _output1
-                    0x080e                  _p_point1
-                    0x085e                  _pid_int
-                    0x0856                  _pid_out
-                    0x085a                  _pid_out1
-                    0x0864                  _port
-                    0x0800                  _pwm_counter
-                    0x0868                  _received_char
-                    0x082e                  _ref
-                    0x0812                  _ref_wifi
-                    0x0813                  _ref_wifi_int
-                    0x0806                  _rpm
-                    0x080a                  _rpm_1
-                    0x08ae                  _s1
-                    0x089a                  _send_char
-                    0x0820                  _t1
-                    0x0822                  _t2
-                    0x0842                  _temp
-                    0x0804                  _test
-                    0x0810                  _token
+                    0x089a                  _E
+                    0x088a                  _T
+                    0x094e                  _b
+                    0x08b6                  _b_ext
+                    0x087c                  _b_flag_uart
+                    0x0868                  _ba
+                    0x086a                  _bb
+                    0x086c                  _bc
+                    0x086e                  _bd
+                    0x0864                  _control_counter
+                    0x087b                  _ctrl
+                    0x08b2                  _diff
+                    0x0874                  _dt
+                    0x0852                  _dt_encoder
+                    0x0896                  _e
+                    0x08a2                  _e_old
+                    0x089e                  _ed
+                    0x0882                  _feedback
+                    0x088e                  _feedback1
+                    0x0886                  _freq
+                    0x087a                  _i
+                    0x0912                  _in_bytes
+                    0x09ce                  _ip_local
+                    0x09dc                  _ip_remote
+                    0x08b0                  _load
+                    0x0866                  _load_error0
+                    0x0876                  _ms
+                    0x0926                  _output
+                    0x093a                  _output1
+                    0x085e                  _p_point1
+                    0x08ae                  _pid_int
+                    0x08a6                  _pid_out
+                    0x08aa                  _pid_out1
+                    0x08b4                  _port
+                    0x0850                  _pwm_counter
+                    0x08b8                  _received_char
+                    0x087e                  _ref
+                    0x0862                  _ref_wifi
+                    0x0863                  _ref_wifi_int
+                    0x0856                  _rpm
+                    0x085a                  _rpm_1
+                    0x08fe                  _s1
+                    0x08ea                  _send_char
+                    0x0870                  _t1
+                    0x0872                  _t2
+                    0x0892                  _temp
+                    0x0854                  _test
+                    0x0860                  _token
 
 External Symbols in Program Memory (by address):
 
@@ -434,21 +447,21 @@ External Symbols in Program Memory (by address):
                   0x001e88                  ___floatdidf
                   0x001ea8                  ___floatundidf
                   0x001efe                  _tok
-                  0x001fd2                  _main
-                  0x001ff6                  _init_pins
-                  0x00200a                  _init_osc
-                  0x00205e                  _init_pwm
-                  0x002088                  _init_timer
-                  0x002114                  _init_input_capture1
-                  0x00214e                  _init_input_capture2
-                  0x00218a                  _init_uart
-                  0x0021ea                  _send_uart
-                  0x002204                  _write_uart
-                  0x00222a                  _delay_us
-                  0x002248                  _init_wifi
-                  0x0022ca                  _ext_getrpm
-                  0x00232a                  _read_text
-                  0x0023dc                  _init_extint
+                  0x001fdc                  _main
+                  0x002004                  _init_pins
+                  0x002018                  _init_osc
+                  0x00206c                  _init_pwm
+                  0x002096                  _init_timer
+                  0x002122                  _init_input_capture1
+                  0x00215c                  _init_input_capture2
+                  0x002198                  _init_uart
+                  0x0021f8                  _send_uart
+                  0x002212                  _write_uart
+                  0x002238                  _delay_us
+                  0x002256                  _init_wifi
+                  0x0022d8                  _ext_getrpm
+                  0x00233c                  _read_text
+                  0x0023e2                  _init_extint
                   0xf80000                  __FBS.sec
                   0xf80002                  __FSS.sec
                   0xf80004                  __FGS.sec
@@ -537,31 +550,31 @@ External Symbols in Program Memory (by name):
                   0x000200                  __resetPRI
                   0x000902                  __sprintf_cdfFnopsuxX
                   0x000902                  __sprintf_cdnopsuxX
-                  0x00222a                  _delay_us
+                  0x002238                  _delay_us
                   0x00123a                  _div
-                  0x0022ca                  _ext_getrpm
-                  0x0023dc                  _init_extint
-                  0x002114                  _init_input_capture1
-                  0x00214e                  _init_input_capture2
-                  0x00200a                  _init_osc
-                  0x001ff6                  _init_pins
-                  0x00205e                  _init_pwm
-                  0x002088                  _init_timer
-                  0x00218a                  _init_uart
-                  0x002248                  _init_wifi
+                  0x0022d8                  _ext_getrpm
+                  0x0023e2                  _init_extint
+                  0x002122                  _init_input_capture1
+                  0x00215c                  _init_input_capture2
+                  0x002018                  _init_osc
+                  0x002004                  _init_pins
+                  0x00206c                  _init_pwm
+                  0x002096                  _init_timer
+                  0x002198                  _init_uart
+                  0x002256                  _init_wifi
                   0x001250                  _ldiv
-                  0x001fd2                  _main
+                  0x001fdc                  _main
                   0x00127a                  _memchr
                   0x000954                  _memcpy
-                  0x00232a                  _read_text
-                  0x0021ea                  _send_uart
+                  0x00233c                  _read_text
+                  0x0021f8                  _send_uart
                   0x00128e                  _strchr
                   0x000962                  _strcspn
                   0x0012a6                  _strlen
                   0x000984                  _strspn
                   0x000920                  _strtok
                   0x001efe                  _tok
-                  0x002204                  _write_uart
+                  0x002212                  _write_uart
                   0x0008f4                  sprintf_cdfFnopsuxX.XXeo:_prout
 
 Memory Configuration
@@ -589,8 +602,36 @@ FUID3            0xf80016           0x000002
 
 Linker script and memory map
 
-LOAD build/default/production/main.o
+
+reserve_data_0x800
+                    0x0800         0x20
+                    0x0820                  . = 0x20
+ *fill*             0x0800         0x2000
+
+reserve_data_0x820
+                    0x0820          0x2
+                    0x0822                  . = 0x2
+ *fill*             0x0820          0x200
+
+reserve_data_0x822
+                    0x0822          0x2
+                    0x0824                  . = 0x2
+ *fill*             0x0822          0x200
+
+reserve_data_0x824
+                    0x0824          0x2
+                    0x0826                  . = 0x2
+ *fill*             0x0824          0x200
+
+reserve_data_0x826
+                    0x0826         0x2a
+                    0x0850                  . = 0x2a
+ *fill*             0x0826         0x2a00
+LOAD build/default/debug/main.o
                     0x0001                  __MPLAB_BUILD = 0x1
+                    0x0001                  __MPLAB_DEBUG = 0x1
+                    0x0001                  __DEBUG = 0x1
+                    0x0001                  __MPLAB_DEBUGGER_PK3 = 0x1
 LOAD c:/program files/microchip/bin/bin/../../lib/dsPIC33F\libp33FJ128GP802-elf.a
 LOAD c:/program files/microchip/bin/bin/../../lib\libfx-elf.a
                     0xf80000                  __FBS = 0xf80000
@@ -634,7 +675,7 @@ LOAD c:/program files/microchip/bin/bin/../../lib\libfx-elf.a
  *(.handle)
  .handle          0x0002c8          0x4 jump_table
  *(.isr*)
- .isr.text        0x0002cc        0x2d8 build/default/production/main.o
+ .isr.text        0x0002cc        0x2d8 build/default/debug/main.o
                   0x0002cc                  __T1Interrupt
                   0x0004e2                  __T2Interrupt
                   0x0004fa                  __T3Interrupt
@@ -831,17 +872,17 @@ usercode
 
 __FBS             0xf80000          0x2
  *(__FBS.sec*)
- __FBS.sec        0xf80000          0x2 /CW/_FBS@–H
+ __FBS.sec        0xf80000          0x2 /CW/_FBSêÖg
                   0xf80000                  __FBS.sec
 
 __FSS             0xf80002          0x2
  *(__FSS.sec*)
- __FSS.sec        0xf80002          0x2 /CW/_FSS0¿H
+ __FSS.sec        0xf80002          0x2 /CW/_FSS@5g
                   0xf80002                  __FSS.sec
 
 __FGS             0xf80004          0x2
  *(__FGS.sec*)
- __FGS.sec        0xf80004          0x2 /CW/_FGS†0I
+ __FGS.sec        0xf80004          0x2 /CW/_FGS∞•g
                   0xf80004                  __FGS.sec
 
 __FOSCSEL
@@ -876,24 +917,24 @@ __FUID3
 
 .debug_info       0x000000       0x344a
  *(.debug_info)
- .debug_info      0x000000       0x344a build/default/production/main.o
+ .debug_info      0x000000       0x344a build/default/debug/main.o
  *(.gnu.linkonce.wi.*)
 
 .debug_abbrev     0x000000        0x1ed
  *(.debug_abbrev)
- .debug_abbrev    0x000000        0x1ed build/default/production/main.o
+ .debug_abbrev    0x000000        0x1ed build/default/debug/main.o
 
 .debug_line       0x000000        0x21c
  *(.debug_line)
- .debug_line      0x000000        0x21c build/default/production/main.o
+ .debug_line      0x000000        0x21c build/default/debug/main.o
 
-.debug_frame      0x000000        0x2de
+.debug_frame      0x000000        0x2e4
  *(.debug_frame)
- .debug_frame     0x000000        0x2de build/default/production/main.o
+ .debug_frame     0x000000        0x2e4 build/default/debug/main.o
 
 .debug_str        0x000000        0x18e
  *(.debug_str)
- .debug_str       0x000000        0x18e build/default/production/main.o
+ .debug_str       0x000000        0x18e build/default/debug/main.o
 
 .debug_loc
  *(.debug_loc)
@@ -905,7 +946,7 @@ __FUID3
                   0x000000        0x373
  *(.debug_pubnames)
  .debug_pubnames
-                  0x000000        0x373 build/default/production/main.o
+                  0x000000        0x373 build/default/debug/main.o
 
 .debug_ranges
  *(.debug_ranges)
@@ -913,7 +954,7 @@ __FUID3
 .debug_aranges    0x000000         0x18
  *(.debug_aranges)
  .debug_aranges
-                  0x000000         0x18 build/default/production/main.o
+                  0x000000         0x18 build/default/debug/main.o
                     0x0000                  WREG0 = 0x0
                     0x0000                  _WREG0 = 0x0
                     0x0002                  WREG1 = 0x2
@@ -1884,10 +1925,10 @@ LOAD c:/program files/microchip/bin/bin/../../lib\liblega-pic30-elf.a
 LOAD c:/program files/microchip/bin/bin/../../lib\libm-elf.a
 LOAD c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a
 END GROUP
-OUTPUT(dist/default/production/speed_ctrl.X.production.elf elf32-pic30)
-LOAD /CW/_FGS†0I
-LOAD /CW/_FSS0¿H
-LOAD /CW/_FBS@–H
+OUTPUT(dist/default/debug/speed_ctrl.X.debug.elf elf32-pic30)
+LOAD /CW/_FGS∞•g
+LOAD /CW/_FSS@5g
+LOAD /CW/_FBSêÖg
 LOAD jump_table
 LOAD default_isr
 LOAD data_init
@@ -1895,12 +1936,12 @@ LOAD data_init
 .debug_pubtypes
                   0x000018        0x39e
  .debug_pubtypes
-                  0x000018        0x39e build/default/production/main.o
+                  0x000018        0x39e build/default/debug/main.o
 
 __c30_signature
                   0x0003b6        0x162
  __c30_signature
-                  0x0003b6          0x6 build/default/production/main.o
+                  0x0003b6          0x6 build/default/debug/main.o
  __c30_signature
                   0x0003bc          0x6 c:/program files/microchip/bin/bin/../../lib\liblega-pic30-elf.a(crt0_standard.o)
  __c30_signature
@@ -2018,145 +2059,145 @@ __c30_signature
  __c30_signature
                   0x000512          0x6 c:/program files/microchip/bin/bin/../../lib\libm-elf.a(floatundidf.eo)
 
-.nbss               0x0800         0x64
- .nbss              0x0800         0x64 build/default/production/main.o
-                    0x0800                  _pwm_counter
-                    0x0802                  _dt_encoder
-                    0x0804                  _test
-                    0x0806                  _rpm
-                    0x080a                  _rpm_1
-                    0x080e                  _p_point1
-                    0x0810                  _token
-                    0x0812                  _ref_wifi
-                    0x0813                  _ref_wifi_int
-                    0x0814                  _control_counter
-                    0x0816                  _load_error0
-                    0x0818                  _ba
-                    0x081a                  _bb
-                    0x081c                  _bc
-                    0x081e                  _bd
-                    0x0820                  _t1
-                    0x0822                  _t2
-                    0x0824                  _dt
-                    0x0826                  _ms
-                    0x082a                  _i
-                    0x082b                  _ctrl
-                    0x082c                  _b_flag_uart
-                    0x082e                  _ref
-                    0x0832                  _feedback
-                    0x0836                  _freq
-                    0x083a                  _T
-                    0x083e                  _feedback1
-                    0x0842                  _temp
-                    0x0846                  _e
-                    0x084a                  _E
-                    0x084e                  _ed
-                    0x0852                  _e_old
-                    0x0856                  _pid_out
-                    0x085a                  _pid_out1
-                    0x085e                  _pid_int
-                    0x0860                  _load
-                    0x0862                  _diff
+.nbss               0x0850         0x64
+ .nbss              0x0850         0x64 build/default/debug/main.o
+                    0x0850                  _pwm_counter
+                    0x0852                  _dt_encoder
+                    0x0854                  _test
+                    0x0856                  _rpm
+                    0x085a                  _rpm_1
+                    0x085e                  _p_point1
+                    0x0860                  _token
+                    0x0862                  _ref_wifi
+                    0x0863                  _ref_wifi_int
+                    0x0864                  _control_counter
+                    0x0866                  _load_error0
+                    0x0868                  _ba
+                    0x086a                  _bb
+                    0x086c                  _bc
+                    0x086e                  _bd
+                    0x0870                  _t1
+                    0x0872                  _t2
+                    0x0874                  _dt
+                    0x0876                  _ms
+                    0x087a                  _i
+                    0x087b                  _ctrl
+                    0x087c                  _b_flag_uart
+                    0x087e                  _ref
+                    0x0882                  _feedback
+                    0x0886                  _freq
+                    0x088a                  _T
+                    0x088e                  _feedback1
+                    0x0892                  _temp
+                    0x0896                  _e
+                    0x089a                  _E
+                    0x089e                  _ed
+                    0x08a2                  _e_old
+                    0x08a6                  _pid_out
+                    0x08aa                  _pid_out1
+                    0x08ae                  _pid_int
+                    0x08b0                  _load
+                    0x08b2                  _diff
 
-.ndata              0x0864          0x4
- .ndata             0x0864          0x4 build/default/production/main.o
-                    0x0864                  _port
-                    0x0866                  _b_ext
+.ndata              0x08b4          0x4
+ .ndata             0x08b4          0x4 build/default/debug/main.o
+                    0x08b4                  _port
+                    0x08b6                  _b_ext
 
-.bss                0x0868         0x9c
- .bss               0x0868         0x9c build/default/production/main.o
-                    0x0868                  _received_char
-                    0x089a                  _send_char
-                    0x08ae                  _s1
-                    0x08c2                  _in_bytes
-                    0x08d6                  _output
-                    0x08ea                  _output1
-                    0x08fe                  _b
+.bss                0x08b8         0x9c
+ .bss               0x08b8         0x9c build/default/debug/main.o
+                    0x08b8                  _received_char
+                    0x08ea                  _send_char
+                    0x08fe                  _s1
+                    0x0912                  _in_bytes
+                    0x0926                  _output
+                    0x093a                  _output1
+                    0x094e                  _b
 
-.data               0x0904         0xb6
- .data              0x0904         0x58 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xldtob_cdfFnopsuxX.XXeo)
- .data              0x095c         0x22 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xlitob.XX_eo)
- .data              0x097e         0x1c build/default/production/main.o
-                    0x097e                  _ip_local
-                    0x098c                  _ip_remote
- .data              0x099a         0x1a c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdfFnopsuxX.XXeo)
- .data              0x09b4          0x4 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(strtok.XX_eo)
- .data              0x09b8          0x2 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xgenld_cdfFnopsuxX.XXeo)
+.data               0x0954         0xb6
+ .data              0x0954         0x58 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xldtob_cdfFnopsuxX.XXeo)
+ .data              0x09ac         0x22 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xlitob.XX_eo)
+ .data              0x09ce         0x1c build/default/debug/main.o
+                    0x09ce                  _ip_local
+                    0x09dc                  _ip_remote
+ .data              0x09ea         0x1a c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xprintf_cdfFnopsuxX.XXeo)
+ .data              0x0a04          0x4 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(strtok.XX_eo)
+ .data              0x0a08          0x2 c:/program files/microchip/bin/bin/../../lib\liblega-c-elf.a(xgenld_cdfFnopsuxX.XXeo)
 
 .config_JTAGEN    0xf8000e          0x2
  .config_JTAGEN
-                  0xf8000e          0x2 build/default/production/main.o
+                  0xf8000e          0x2 build/default/debug/main.o
 
 .config_ALTI2C    0xf8000c          0x2
  .config_ALTI2C
-                  0xf8000c          0x2 build/default/production/main.o
+                  0xf8000c          0x2 build/default/debug/main.o
 
 .config_FWDTEN    0xf8000a          0x2
  .config_FWDTEN
-                  0xf8000a          0x2 build/default/production/main.o
+                  0xf8000a          0x2 build/default/debug/main.o
 
 .config_FCKSM     0xf80008          0x2
- .config_FCKSM    0xf80008          0x2 build/default/production/main.o
+ .config_FCKSM    0xf80008          0x2 build/default/debug/main.o
 
 .config_IESO      0xf80006          0x2
- .config_IESO     0xf80006          0x2 build/default/production/main.o
+ .config_IESO     0xf80006          0x2 build/default/debug/main.o
 
 .ivt._T1Interrupt
                   0x00001a          0x2
  .ivt._T1Interrupt
-                  0x00001a          0x2 build/default/production/main.o
+                  0x00001a          0x2 build/default/debug/main.o
 
 .ivt._T2Interrupt
                   0x000022          0x2
  .ivt._T2Interrupt
-                  0x000022          0x2 build/default/production/main.o
+                  0x000022          0x2 build/default/debug/main.o
 
 .ivt._T3Interrupt
                   0x000024          0x2
  .ivt._T3Interrupt
-                  0x000024          0x2 build/default/production/main.o
+                  0x000024          0x2 build/default/debug/main.o
 
 .ivt._IC1Interrupt
                   0x000016          0x2
  .ivt._IC1Interrupt
-                  0x000016          0x2 build/default/production/main.o
+                  0x000016          0x2 build/default/debug/main.o
 
 .ivt._U1RXInterrupt
                   0x00002a          0x2
  .ivt._U1RXInterrupt
-                  0x00002a          0x2 build/default/production/main.o
+                  0x00002a          0x2 build/default/debug/main.o
 
 .ivt._U1TXInterrupt
                   0x00002c          0x2
  .ivt._U1TXInterrupt
-                  0x00002c          0x2 build/default/production/main.o
+                  0x00002c          0x2 build/default/debug/main.o
 
 .ivt._INT1Interrupt
                   0x00003c          0x2
  .ivt._INT1Interrupt
-                  0x00003c          0x2 build/default/production/main.o
+                  0x00003c          0x2 build/default/debug/main.o
 
-.const              0x9efe         0xd4 load address 0x001efe  
- .const             0x9efe         0xd4 build/default/production/main.o
+.const              0x9efe         0xde load address 0x001efe  
+ .const             0x9efe         0xde build/default/debug/main.o
                     0x9efe                  _tok
 
-.text             0x001fd2        0x428
- .text            0x001fd2        0x428 build/default/production/main.o
-                  0x001fd2                  _main
-                  0x001ff6                  _init_pins
-                  0x00200a                  _init_osc
-                  0x00205e                  _init_pwm
-                  0x002088                  _init_timer
-                  0x002114                  _init_input_capture1
-                  0x00214e                  _init_input_capture2
-                  0x00218a                  _init_uart
-                  0x0021ea                  _send_uart
-                  0x002204                  _write_uart
-                  0x00222a                  _delay_us
-                  0x002248                  _init_wifi
-                  0x0022ca                  _ext_getrpm
-                  0x00232a                  _read_text
-                  0x0023dc                  _init_extint
+.text             0x001fdc        0x424
+ .text            0x001fdc        0x424 build/default/debug/main.o
+                  0x001fdc                  _main
+                  0x002004                  _init_pins
+                  0x002018                  _init_osc
+                  0x00206c                  _init_pwm
+                  0x002096                  _init_timer
+                  0x002122                  _init_input_capture1
+                  0x00215c                  _init_input_capture2
+                  0x002198                  _init_uart
+                  0x0021f8                  _send_uart
+                  0x002212                  _write_uart
+                  0x002238                  _delay_us
+                  0x002256                  _init_wifi
+                  0x0022d8                  _ext_getrpm
+                  0x00233c                  _read_text
+                  0x0023e2                  _init_extint
 
-.dinit            0x0023fa         0xbc
- .dinit           0x0023fa         0xbc data_init
+.dinit            0x002400         0xbc
+ .dinit           0x002400         0xbc data_init
